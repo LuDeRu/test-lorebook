@@ -33,11 +33,34 @@ jobs:
       - name: Build lorebook
         run: |
           mkdir -p lorebook
+
+          # Run python build script
           python scripts/build_lorebook.py
+
+          # Read OUTPUT_FILE value from python script
+          GENERATED_FILE=$(python - << 'EOF'
+          import scripts.build_lorebook as lb
+          print(lb.OUTPUT_FILE)
+          EOF
+          )
+
+          echo "Python reported output file: $GENERATED_FILE"
+
+          if [ ! -f "$GENERATED_FILE" ]; then
+            echo "ERROR: Expected output file '$GENERATED_FILE' but it does not exist!"
+            exit 1
+          fi
+
+          BASENAME="${GENERATED_FILE%.json}"
+
           TIMESTAMP=$(date +'%Y%m%d')
-          VERSION="v${{ github.run_number }}_$TIMESTAMP"
-          mv lorebook.json "lorebook/lorebook_$VERSION.json"
-          echo "LOREBOOK_FILE=lorebook/lorebook_$VERSION.json" >> $GITHUB_ENV
+          VERSION="v${{ github.run_number }}_${TIMESTAMP}"
+
+          FINAL_NAME="${BASENAME}_${VERSION}.json"
+
+          mv "$GENERATED_FILE" "lorebook/$FINAL_NAME"
+
+          echo "LOREBOOK_FILE=lorebook/$FINAL_NAME" >> $GITHUB_ENV
 
       # 5. Commit updated lorebook.json if there are changes
       - name: Commit updated lorebook.json
