@@ -5,7 +5,6 @@ on:
     branches: [ main ]
     paths:
       - "lorebook_entries/**"
-      - "scripts/**"
   workflow_dispatch:
 
 jobs:
@@ -49,3 +48,5 @@ jobs:
           tag_name: v${{ github.run_number }}
           name: Lorebook Build ${{ github.run_number }}
           files: lorebook.json
+		env:
+		  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
