@@ -5,6 +5,7 @@ on:
     branches: [ main ]
     paths:
       - "lorebook_entries/**"
+      - "scripts/**"
   workflow_dispatch:
 
 jobs:
@@ -12,41 +13,49 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1. Checkout code
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+      # 2. Set up Python
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.11"
 
+      # 3. Install dependencies
       - name: Install dependencies
         run: |
           pip install --upgrade pip
 
+      # 4. Build lorebook and save in 'lorebook/' folder
       - name: Build lorebook
         run: |
+          mkdir -p lorebook
           python scripts/build_lorebook.py
+          mv lorebook.json lorebook/lorebook.json
 
+      # 5. Commit updated lorebook.json if there are changes
       - name: Commit updated lorebook.json
         run: |
           if ! git diff --quiet; then
             git config --global user.name "GitHub Actions"
             git config --global user.email "actions@github.com"
-            git add lorebook.json
+            git add lorebook/lorebook.json
             git commit -m "Update lorebook.json"
             git push
           else
             echo "No changes to commit."
           fi
 
+      # 6. Create a versioned release
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ github.run_number }}
           name: Lorebook Build ${{ github.run_number }}
-          files: lorebook.json
-		env:
-		  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          files: lorebook/lorebook.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
