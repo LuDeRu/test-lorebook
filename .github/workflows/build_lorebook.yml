@@ -34,7 +34,7 @@ jobs:
         run: |
           mkdir -p lorebook
           python scripts/build_lorebook.py
-          TIMESTAMP=$(date +'%Y%m%d-%H%M%S')
+          TIMESTAMP=$(date +'%Y%m%d')
           VERSION="v${{ github.run_number }}_$TIMESTAMP"
           mv lorebook.json "lorebook/lorebook_$VERSION.json"
           echo "LOREBOOK_FILE=lorebook/lorebook_$VERSION.json" >> $GITHUB_ENV
