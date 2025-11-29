@@ -1,5 +1,7 @@
 Name: The Far Lands
 Keys: far lands, safe place, blue sky
+Depth: 5
+Order: 150
 
 Content:
 The Far Lands are legendary…
