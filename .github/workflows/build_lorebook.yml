@@ -1,0 +1,44 @@
+name: Build Lorebook
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - "lorebook_entries/**"
+      - "scripts/**"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # needed for committing changes
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+
+      - name: Build lorebook
+        run: |
+          python scripts/build_lorebook.py
+
+      - name: Commit updated lorebook.json
+        run: |
+          if ! git diff --quiet; then
+            git config --global user.name "GitHub Actions"
+            git config --global user.email "actions@github.com"
+            git add lorebook.json
+            git commit -m "Update lorebook.json"
+            git push
+          else
+            echo "No changes to commit."
+          fi
