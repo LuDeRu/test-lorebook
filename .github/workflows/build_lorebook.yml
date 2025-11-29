@@ -5,6 +5,7 @@ on:
     branches: [ main ]
     paths:
       - "lorebook_entries/**"
+      - "scripts/**"
   workflow_dispatch:
 
 jobs:
@@ -29,12 +30,15 @@ jobs:
         run: |
           pip install --upgrade pip
 
-      # 4. Build lorebook and save in 'lorebook/' folder
+      # 4. Build lorebook and save in 'lorebook/' folder with a unique versioned name
       - name: Build lorebook
         run: |
           mkdir -p lorebook
           python scripts/build_lorebook.py
-          mv lorebook.json lorebook/lorebook.json
+          TIMESTAMP=$(date +'%Y%m%d-%H%M%S')
+          VERSION="v${{ github.run_number }}_$TIMESTAMP"
+          mv lorebook.json "lorebook/lorebook_$VERSION.json"
+          echo "LOREBOOK_FILE=lorebook/lorebook_$VERSION.json" >> $GITHUB_ENV
 
       # 5. Commit updated lorebook.json if there are changes
       - name: Commit updated lorebook.json
@@ -42,20 +46,19 @@ jobs:
           if ! git diff --quiet; then
             git config --global user.name "GitHub Actions"
             git config --global user.email "actions@github.com"
-            git add lorebook/lorebook.json
+            git add lorebook/*.json
             git commit -m "Update lorebook.json"
             git push
           else
             echo "No changes to commit."
           fi
 
-      # 6. Create a versioned release using a Personal Access Token (PAT)
+      # 6. Create a versioned release with the unique lorebook file
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ github.run_number }}
           name: Lorebook Build ${{ github.run_number }}
-          files: lorebook/lorebook.json
+          files: ${{ env.LOREBOOK_FILE }}
         env:
-          # Replace REPO_PAT with your secret name for the Personal Access Token
           GITHUB_TOKEN: ${{ secrets.REPO_PAT }}
