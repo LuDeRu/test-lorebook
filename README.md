@@ -157,6 +157,9 @@ Yes. Everything after `Content:` is included as-is.
 **Q: What if I’m unsure about formatting?**  
 Just open a Pull Request — someone will help you adjust it.
 
+**Q: Why GitHub?**  
+Version control, easy collaboration with Pull Requests and automatic Lorebook creation with workflows.
+
 ---
 
 # 🎉 Thank You for Helping Build the Lorebook!
