@@ -42,3 +42,10 @@ jobs:
           else
             echo "No changes to commit."
           fi
+
+            - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ github.run_number }}
+          name: Lorebook Build ${{ github.run_number }}
+          files: lorebook.json
